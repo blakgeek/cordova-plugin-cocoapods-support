@@ -29,12 +29,13 @@
   "license": "MIT",
   "dependencies": {
     "command-exists": "^1.0.1",
-    "sax": "^1.2.1",
     "xml2js": "^0.4.16"
   },
   "bundledDependencies": [
     "command-exists",
     "xml2js",
-    "sax"
+    "sax",
+    "xmlbuilder",
+    "lodash"
   ]
 }
