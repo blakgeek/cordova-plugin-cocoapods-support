@@ -29,7 +29,7 @@ phonegap local plugin add cordova-plugin-cocoapod-support
         A Cordova/PhoneGap demonstrating the use of Cocoapod dependencies.
     </description>
     
-    <dependency id="cordova-plugin-someplugin"/>
+    <dependency id="cordova-plugin-cocoapod-support"/>
 
     <platform name="ios">
         <pod id="SomePod" version="1.0.0"/>

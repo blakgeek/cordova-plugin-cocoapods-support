@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-cocoapod-support",
   "version": "1.0.1",
-  "description": "A Cordova/PhoneGap plugin to add support for cocoapod dependencies.",
+  "description": "A Cordova/PhoneGap plugin to add support for Cocoapod dependencies.",
   "cordova": {
     "id": "cordova-plugin-cocoapod-support",
     "platforms": [
@@ -19,13 +19,12 @@
   "homepage": "https://github.com/blakgeek/cordova-plugin-cocoapod-support",
   "keywords": [
     "ecosystem:cordova",
-    "cordova-android",
     "cordova-ios",
     "cordova:plugin",
-    "spaces",
-    "app",
-    "name",
-    "rename"
+    "cocoapods",
+    "pod",
+    "pods",
+    "plugin"
   ],
   "license": "MIT",
   "dependencies": {
@@ -33,6 +32,7 @@
     "xml2js": "^0.4.16"
   },
   "bundledDependencies": [
+    "command-exists",
     "xml2js"
   ]
 }
