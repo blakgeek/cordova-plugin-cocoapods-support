@@ -24,21 +24,18 @@ phonegap local plugin add cordova-plugin-cocoapod-support
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
 <plugin id="cordova-plugin-withpods" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
-    <name>Plugin With Pods</name>
-    <author>Carlos "blakgeek" Lawton</author>
+    <name>A Plugin With Cocoapod Dependencies</name>
     <description>
-        A Cordova/PhoneGap demostrating the use of cocoapod dependencies.
+        A Cordova/PhoneGap demonstrating the use of Cocoapod dependencies.
     </description>
-    <keywords>cordova, ios, cocoapods</keywords>
-    <license>MIT</license>
-    <engines>
-        <engine name="cordova" version=">=3.0.0"/>
-    </engines>
+    
+    <dependency id="cordova-plugin-someplugin"/>
 
     <platform name="ios">
-        <pod id="FBSDKCoreKit" version="1.0.0"/>
-        <pod id="FBSDKShareKit"/>
-        <pod id="FBSDKLoginKit"/>
+        <pod id="SomePod" version="1.0.0"/>
+        <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1 configuration="debug" />
+        <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug/>
+        <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368"/>
     </platform>
 </plugin>
 ```
@@ -47,8 +44,7 @@ or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-w
 
 
 ##TODO:
-# update with examples of all support pod attributes (git, podspec, path, subspec, configuration(s) )
-# a
+* Update with examples of all of the supported pod attributes (git, podspec, path, subspec, configuration(s) )
 
 
 
