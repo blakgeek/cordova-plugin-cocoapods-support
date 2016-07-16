@@ -33,6 +33,7 @@
   },
   "bundledDependencies": [
     "command-exists",
-    "xml2js"
+    "xml2js",
+    "sax"
   ]
 }
