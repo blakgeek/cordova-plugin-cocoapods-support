@@ -32,7 +32,8 @@ phonegap local plugin add cordova-plugin-cocoapod-support
     <dependency id="cordova-plugin-cocoapod-support"/>
 
     <platform name="ios">
-        <pod id="SomePod" version="1.0.0"/>
+        <pod id="LatestPod" />
+        <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
         <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
         <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
