@@ -10,9 +10,10 @@ var parser = new xml2js.Parser();
 module.exports = function (context) {
 
     console.log('Searching for new pods');
-    var allPods = [];
     var podfileContents = [];
     var appName = getConfigParser(context, 'config.xml').name();
+    var pods = {};
+    var pod, podId;
 
     context.opts.cordova.plugins.forEach(function (id) {
         parser.parseString(fs.readFileSync(context.opts.projectRoot + '/plugins/' + id + '/plugin.xml'), function (err, data) {
@@ -20,18 +21,14 @@ module.exports = function (context) {
             if (data.plugin.platform) {
                 data.plugin.platform.forEach(function (platform) {
 
+                    console.log('Checking %s for pods.', id);
                     if (platform.$.name === 'ios') {
-                        var pods = [].concat(platform.pod || []).map(function (pod) {
-                            return pod.$;
-                        });
-                        console.log('Checking %s for pods.', id);
-                        if (pods.length) {
-                            console.log('%s requires the following pods: %s', id, pods.map(function(pod) {
-                                return pod.id;
-                            }).join(', '));
-                            allPods = allPods.concat(pods);
-                        } else {
-                            console.log('%s is podless', id);
+                        if (platform.$.name === 'ios') {
+
+                            (platform.pod || []).forEach(function (pod) {
+                                pods[pod.id] = pod;
+                                console.log('%s requires pod: %s', id, pod.id);
+                            });
                         }
                     }
                 });
@@ -39,10 +36,28 @@ module.exports = function (context) {
         });
     });
 
+    parser.parseString(fs.readFileSync(context.opts.projectRoot + 'config.xml'), function (err, data) {
+
+        if (data.widget.platform) {
+            data.plugin.platform.forEach(function (platform) {
+
+                if (platform.$.name === 'ios') {
+
+                    console.log('Checking config.xml for pods.');
+                    (platform.pod || []).forEach(function (pod) {
+                        pods[pod.id] = pod;
+                        console.log('config.xml requires pod: %s', pod.id);
+                    });
+                }
+            });
+        }
+    });
+
     podfileContents.push("platform :ios, '7.0'");
     podfileContents.push("target '" + appName + "' do");
-    allPods.forEach(function (pod) {
-        //  pod <id>, <version> <git> <branch> <tag> <commit> <subspecs> <path> <podspec>
+
+    for(podId in pods) {
+        pod = pods[podId];
         var entry = "\tpod '" + pod.id + "'";
         if (pod.version) {
             entry += ", '" + pod.version + "'";
@@ -72,7 +87,7 @@ module.exports = function (context) {
             entry += ", :subspecs => [" + configs.join() + "]";
         }
         podfileContents.push(entry);
-    });
+    }
     podfileContents.push('end');
     fs.writeFileSync('platforms/ios/Podfile', podfileContents.join('\n'));
 
@@ -104,6 +119,7 @@ module.exports = function (context) {
 
 function getConfigParser(context, config) {
     var semver = context.requireCordovaModule('semver');
+    var ConfigParser;
 
     if (semver.lt(context.opts.cordova.version, '5.4.0')) {
         ConfigParser = context.requireCordovaModule('cordova-lib/src/ConfigParser/ConfigParser');
