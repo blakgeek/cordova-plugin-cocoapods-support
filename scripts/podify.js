@@ -26,8 +26,8 @@ module.exports = function (context) {
                         if (platform.$.name === 'ios') {
 
                             (platform.pod || []).forEach(function (pod) {
-                                pods[pod.id] = pod;
-                                console.log('%s requires pod: %s', id, pod.id);
+                                pods[pod.$.id] = pod.$;
+                                console.log('%s requires pod: %s', id, pod.$.id);
                             });
                         }
                     }
@@ -36,17 +36,17 @@ module.exports = function (context) {
         });
     });
 
-    parser.parseString(fs.readFileSync(context.opts.projectRoot + 'config.xml'), function (err, data) {
+    parser.parseString(fs.readFileSync(context.opts.projectRoot + '/config.xml'), function (err, data) {
 
         if (data.widget.platform) {
-            data.plugin.platform.forEach(function (platform) {
+            data.widget.platform.forEach(function (platform) {
 
                 if (platform.$.name === 'ios') {
 
                     console.log('Checking config.xml for pods.');
                     (platform.pod || []).forEach(function (pod) {
-                        pods[pod.id] = pod;
-                        console.log('config.xml requires pod: %s', pod.id);
+                        pods[pod.$.id] = pod.$;
+                        console.log('config.xml requires pod: %s', pod.$.id);
                     });
                 }
             });
