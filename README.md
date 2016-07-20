@@ -1,10 +1,10 @@
 # cordova-plugin-cocoapod-support
 Are you tired of manually adding ios dependencies in Cordova apps?  Me too.  Android has Gradle support out of the box, but
-Cocoapods get no love.  That is until now.  
+CocoaPods get no love.  That is until now.  
 
-With this plugin you can define your plugin or project Cocoapod dependencies right in your xml. 
+With this plugin you can define your plugin or project CocoaPods dependencies right in your xml. 
 
-Note: dependencies defined in the config.xml take precendence of dependencies defined in plugin's.
+Note: dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
  
 ## How does it work?
 It looks for &lt;pod&gt; entries the config.xml and plugin.xml, creates the Podfile, updates the necessary configs and 
@@ -29,9 +29,9 @@ In a plugin's plugin.xml
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
 <plugin id="cordova-plugin-withpods" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
-    <name>A Plugin With Cocoapod Dependencies</name>
+    <name>A Plugin With CocoaPods Dependencies</name>
     <description>
-        A plugin demonstrating the use of Cocoapod dependencies.
+        A plugin demonstrating the use of CocoaPods dependencies.
     </description>
     
     <dependency id="cordova-plugin-cocoapod-support"/>
@@ -52,7 +52,7 @@ In a project's config.xml
 <widget id="com.blakgeek.cordova.superdopeness" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>CocoapodsDemo</name>
     <description>
-        An app demonstrating the use of Cocoapod dependencies.
+        An app demonstrating the use of CocoaPods dependencies.
     </description>
     <content src="index.html" />
     <access origin="*" />
