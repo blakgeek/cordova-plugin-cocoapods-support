@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <plugin id="cordova-plugin-cocoapod-support" version="1.0.2" xmlns="http://apache.org/cordova/ns/plugins/1.0">
-    <name>Cordova Cocoapod Dependencies Support</name>
+    <name>Cordova CocoaPods Dependency Support</name>
     <author>Carlos "blakgeek" Lawton</author>
-    <description>A Cordova/PhoneGap plugin to add support for Cocoapod dependencies.</description>
+    <description>A Cordova/PhoneGap plugin to add support for CocoaPods dependencies.</description>
     <keywords>cordova, ios, cocoapods, pod, pods, demo, example</keywords>
     <license>MIT</license>
     <engines>

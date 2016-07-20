@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/blakgeek/cordova-plugin-cocoapod-support.git"
+    "url": "https://github.com/blakgeek/cordova-plugin-cocoapods-support.git"
   },
   "bugs": {
-    "url": "https://github.com/blakgeek/cordova-plugin-cocoapod-support/issues"
+    "url": "https://github.com/blakgeek/cordova-plugin-cocoapods-support/issues"
   },
-  "homepage": "https://github.com/blakgeek/cordova-plugin-cocoapod-support",
+  "homepage": "https://github.com/blakgeek/cordova-plugin-cocoapods-support",
   "keywords": [
     "ecosystem:cordova",
     "cordova-ios",
