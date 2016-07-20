@@ -67,20 +67,12 @@ In a project's config.xml
 
 or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-withpods).
 
-##Troubleshooting
-For some reason CocoaPods adds a resource named libPods-<app name> to the project.  This causes a linker error when you
-try to build the project.  
 
-![Linker Error][linker_error]
-
-Just remove the resource and all is well.
-
-![Bad Resource][bad_resource]
 
 
 ##TODO:
 * Update with examples of all of the supported pod attributes (git, podspec, path, subspec, configuration(s) )
-* Find a way to automatically remove the invalid resource.
+
 
 
 [bad_resource]: ./bad_resource.png "Bad Resource"
