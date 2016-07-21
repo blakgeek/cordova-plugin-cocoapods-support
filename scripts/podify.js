@@ -10,7 +10,7 @@ var parser = new xml2js.Parser();
 
 module.exports = function (context) {
 
-    if(!fs.existsSync(context.opts.projectRoot + '/platforms/ios')) {
+    if(!fs.existsSync('platforms/ios')) {
         return;
     }
 
@@ -18,12 +18,12 @@ module.exports = function (context) {
     var podfileContents = [];
     var appName = getConfigParser(context, 'config.xml').name();
     var newPods = {};
-    var podConfigPath = context.opts.projectRoot + '/.pods.json';
+    var podConfigPath = '.pods.json';
     var pod, podId;
     var currentPods = fs.existsSync(podConfigPath) ? JSON.parse(fs.readFileSync(podConfigPath)) : {};
 
     context.opts.cordova.plugins.forEach(function (id) {
-        parser.parseString(fs.readFileSync(context.opts.projectRoot + '/plugins/' + id + '/plugin.xml'), function (err, data) {
+        parser.parseString(fs.readFileSync('plugins/' + id + '/plugin.xml'), function (err, data) {
 
             if (data.plugin.platform) {
                 console.log('Checking %s for pods.', id);
@@ -43,7 +43,7 @@ module.exports = function (context) {
         });
     });
 
-    parser.parseString(fs.readFileSync(context.opts.projectRoot + '/config.xml'), function (err, data) {
+    parser.parseString(fs.readFileSync('config.xml'), function (err, data) {
 
         if (data.widget.platform) {
             console.log('Checking config.xml for pods.');
@@ -111,6 +111,7 @@ module.exports = function (context) {
         commandExists('pod', function (err, exists) {
 
             if (exists) {
+
                 exec('pod update', {
                     cwd: 'platforms/ios'
                 }, function (err, stdout, stderr) {
@@ -118,7 +119,7 @@ module.exports = function (context) {
                     console.error(stderr);
                 });
             } else {
-                console.log("\nAh man!. It doesn't look like you have Cocoapods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
+                console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
             }
         });
 
@@ -126,6 +127,23 @@ module.exports = function (context) {
     } else {
         console.log('No new pods detects');
     }
+
+
+    commandExists('pod', function (err, exists) {
+
+        if (exists) {
+
+            console.log('Updating ios build to use workspace.')
+            var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
+            var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
+            var targetFix = "'-scheme', projectName,";
+            var projectRegex = new RegExp("'-project'\\s*,\\s*projectName\\s*\\+\\s*'\\.xcodeproj'\\s*,", 'g');
+            var projectFix = "'-workspace', projectName + '.xcworkspace',";
+            var fixedBuildContent = buildContent.replace(targetRegex, targetFix).replace(projectRegex, projectFix);
+
+            fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
+        }
+    });
 };
 
 function getConfigParser(context, config) {
