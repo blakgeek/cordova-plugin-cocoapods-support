@@ -5,24 +5,30 @@ var fs = require('fs');
 var path = require("path");
 var xml2js = require('xml2js');
 var commandExists = require('command-exists');
-var exec = require('child_process').exec
+var execSync = require('child_process').execSync;
 var parser = new xml2js.Parser();
 
 module.exports = function (context) {
 
-    if(!fs.existsSync('platforms/ios')) {
+    if (!fs.existsSync('platforms/ios')) {
         return;
     }
-
-    console.log(JSON.stringify(context, null, '\t'));
 
     console.log('Searching for new pods');
     var podfileContents = [];
     var appName = getConfigParser(context, 'config.xml').name();
     var newPods = {};
-    var podConfigPath = '.pods.json';
+    var podConfigPath = 'platforms/ios/.pods.json';
     var pod, podId;
-    var currentPods = fs.existsSync(podConfigPath) ? JSON.parse(fs.readFileSync(podConfigPath)) : {nomatch: true};
+    var podified = fs.existsSync(podConfigPath);
+    var currentPods = podified ? JSON.parse(fs.readFileSync(podConfigPath)) : {};
+    var workspaceDir = 'platforms/ios/' + appName + '.xcworkspace';
+    var sharedDataDir = workspaceDir + '/xcshareddata';
+    var pluginDir = context.opts.plugin.pluginInfo.dir;
+    var schemesSrcDir = pluginDir + '/schemes';
+    var schemesTargetDir = sharedDataDir + '/xcschemes';
+
+
 
     context.opts.cordova.plugins.forEach(function (id) {
         parser.parseString(fs.readFileSync('plugins/' + id + '/plugin.xml'), function (err, data) {
@@ -60,7 +66,7 @@ module.exports = function (context) {
         }
     });
 
-    if(!_.isEqual(newPods, currentPods)) {
+    if (!podified || !_.isEqual(newPods, currentPods)) {
 
         podfileContents.push("platform :ios, '7.0'");
         podfileContents.push("target '" + appName + "' do");
@@ -110,30 +116,24 @@ module.exports = function (context) {
             fs.writeFileSync('platforms/ios/cordova/build-release.xcconfig', releaseXcContents + '\n' + '#include "Pods/Target Support Files/Pods-' + appName + '/Pods-' + appName + '.release.xcconfig"');
         }
 
-        commandExists('pod', function (err, exists) {
-
-            if (exists) {
-
-                exec('pod update', {
-                    cwd: 'platforms/ios'
-                }, function (err, stdout, stderr) {
-                    console.log(stdout);
-                    console.error(stderr);
-                });
-            } else {
-                console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
-            }
-        });
-
         fs.writeFileSync(podConfigPath, JSON.stringify(newPods, null, '\t'));
     } else {
         console.log('No new pods detects');
     }
 
-
     commandExists('pod', function (err, exists) {
 
         if (exists) {
+
+            if (!podified || !_.isEqual(newPods, currentPods)) {
+                console.log('Installing pods');
+                execSync('pod update', {
+                    cwd: 'platforms/ios'
+                }, function (err, stdout, stderr) {
+                    console.log(stdout);
+                    console.error(stderr);
+                });
+            }
 
             console.log('Updating ios build to use workspace.')
             var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
@@ -149,9 +149,41 @@ module.exports = function (context) {
                 .replace(xcodeprojRegex, xcodeprojFix);
 
             fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
+
+            if(!podified) {
+                console.log('Adding schemes');
+                fs.mkdirSync(sharedDataDir);
+                fs.mkdirSync(schemesTargetDir);
+                copyTpl(schemesSrcDir + '/CordovaLib.xcscheme', schemesTargetDir + '/CordovaLib.xcscheme', {
+                    appName: appName
+                });
+                copyTpl(schemesSrcDir + '/App.xcscheme', schemesTargetDir + '/' + appName + '.xcscheme', {
+                    appName: appName,
+                    appId: '1D6058900D05DD3D006BFB54'
+                });
+            }
+
+        } else {
+            console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
         }
     });
 };
+
+function templify(str, data) {
+
+    return str.replace(/{[^{}]+}/g, function (key) {
+        var k = key.replace(/[{}]+/g, "");
+        return data.hasOwnProperty(k) ? data[k] : "";
+    });
+}
+
+function copy(src, dest) {
+    fs.writeFileSync(dest, fs.readFileSync(src, 'utf8'));
+}
+
+function copyTpl(src, dest, data) {
+    fs.writeFileSync(dest, templify(fs.readFileSync(src, 'utf8'), data));
+}
 
 function getConfigParser(context, config) {
     var semver = context.requireCordovaModule('semver');
