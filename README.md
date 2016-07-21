@@ -2,9 +2,11 @@
 Are you tired of manually adding ios dependencies in Cordova apps?  Me too.  Android has Gradle support out of the box, but
 CocoaPods get no love.  That is until now.  
 
-With this plugin you can define your plugin or project CocoaPods dependencies right in your xml. 
+With this plugin you can define your plugin or project CocoaPods dependencies right in your xml.
+ 
+After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.
 
-Note: dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
+Note: Dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
  
 ## How does it work?
 It looks for &lt;pod&gt; entries the config.xml and plugin.xml, creates the Podfile, updates the necessary configs and 
