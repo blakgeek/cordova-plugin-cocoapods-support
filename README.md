@@ -4,7 +4,10 @@ CocoaPods get no love.  That is until now.
 
 With this plugin you can define your plugin or project CocoaPods dependencies right in your xml.
  
-After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.
+After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.  You will also have to open
+the new workspace in XCode at least once so that the necessary schemes are created before the commandline build will work.  
+
+I'm trying to figure out a better solution but for now this is all I've got. 
 
 Note: Dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
  

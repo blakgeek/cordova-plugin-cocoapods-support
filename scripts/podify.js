@@ -14,13 +14,15 @@ module.exports = function (context) {
         return;
     }
 
+    console.log(JSON.stringify(context, null, '\t'));
+
     console.log('Searching for new pods');
     var podfileContents = [];
     var appName = getConfigParser(context, 'config.xml').name();
     var newPods = {};
     var podConfigPath = '.pods.json';
     var pod, podId;
-    var currentPods = fs.existsSync(podConfigPath) ? JSON.parse(fs.readFileSync(podConfigPath)) : {};
+    var currentPods = fs.existsSync(podConfigPath) ? JSON.parse(fs.readFileSync(podConfigPath)) : {nomatch: true};
 
     context.opts.cordova.plugins.forEach(function (id) {
         parser.parseString(fs.readFileSync('plugins/' + id + '/plugin.xml'), function (err, data) {
@@ -139,7 +141,12 @@ module.exports = function (context) {
             var targetFix = "'-scheme', projectName,";
             var projectRegex = new RegExp("'-project'\\s*,\\s*projectName\\s*\\+\\s*'\\.xcodeproj'\\s*,", 'g');
             var projectFix = "'-workspace', projectName + '.xcworkspace',";
-            var fixedBuildContent = buildContent.replace(targetRegex, targetFix).replace(projectRegex, projectFix);
+            var xcodeprojRegex = /\.xcodeproj/g;
+            var xcodeprojFix = '.xcworkspace';
+            var fixedBuildContent = buildContent
+                .replace(targetRegex, targetFix)
+                .replace(projectRegex, projectFix)
+                .replace(xcodeprojRegex, xcodeprojFix);
 
             fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
         }
