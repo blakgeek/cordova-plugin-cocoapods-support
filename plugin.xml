@@ -9,7 +9,5 @@
         <engine name="cordova" version=">=3.0.0"/>
     </engines>
 
-    <hook type="before_prepare" src="scripts/podify.js"/>
-    <hook type="after_plugin_add" src="scripts/podify.js"/>
-    <hook type="after_plugin_rm" src="scripts/podify.js"/>
+    <hook type="after_prepare" src="scripts/podify.js"/>
 </plugin>
