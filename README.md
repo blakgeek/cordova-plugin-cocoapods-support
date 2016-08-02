@@ -39,6 +39,10 @@ In a plugin's plugin.xml
     <dependency id="cordova-plugin-cocoapod-support"/>
 
     <platform name="ios">
+        <!-- set platform :ios, defaults to 7.0 -->
+        <preference name="pods_min_ios_version" value="8.0"/>
+        <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
+        <preference name="pods_use_frameworks" value="true">
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
@@ -69,7 +73,9 @@ In a project's config.xml
 
 or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-withpods).
 
-
+## Notes
+* Enabling the pods_use_frameworks preference disables the bridge headers property added by 
+(CB-10072)[https://issues.apache.org/jira/browse/CB-10072].  This might cause odd behavior in some projects.  
 
 
 ##TODO:

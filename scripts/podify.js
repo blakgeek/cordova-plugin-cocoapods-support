@@ -16,17 +16,26 @@ module.exports = function (context) {
 
     var Q = context.requireCordovaModule('q');
     var podfileContents = [];
-    var appName = getConfigParser(context, 'config.xml').name();
-    var newPods = {};
-    var podConfigPath = 'platforms/ios/.pods.json';
+    var rootPath = context.opts.projectRoot;
+    var configXmlPath = path.join(rootPath, 'config.xml');
+    var configParser = getConfigParser(context, configXmlPath);
+    var appName = configParser.name();
+    var iosMinVersion = configParser.getPreference('pods_ios_min_version', 'ios') || configParser.getPreference('pods_ios_min_version') || '7.0';
+    var useFrameworks = configParser.getPreference('pods_use_frameworks', 'ios') || configParser.getPreference('pods_use_frameworks') || 'false';
+    var podConfigPath = path.join(rootPath, 'platforms', 'ios', '.pods.json');
     var pod, podId;
     var podified = fs.existsSync(podConfigPath);
     var currentPods = podified ? JSON.parse(fs.readFileSync(podConfigPath)) : {};
-    var workspaceDir = 'platforms/ios/' + appName + '.xcworkspace';
-    var sharedDataDir = workspaceDir + '/xcshareddata';
+    var workspaceDir = path.join(rootPath, 'platforms', 'ios', '' + appName + '.xcworkspace');
+    var sharedDataDir = path.join(workspaceDir, 'xcshareddata');
     var pluginDir = context.opts.plugin.pluginInfo.dir;
-    var schemesSrcDir = pluginDir + '/schemes';
-    var schemesTargetDir = sharedDataDir + '/xcschemes';
+    var schemesSrcDir = path.join(pluginDir, 'schemes');
+    var schemesTargetDir = path.join(sharedDataDir, 'xcschemes');
+    var newPods = {
+        iosMinVersion: iosMinVersion,
+        useFrameworks: useFrameworks === 'true',
+        pods: {}
+    };
 
     console.log('Searching for new pods');
 
@@ -44,7 +53,7 @@ module.exports = function (context) {
                 data.widget.platform.forEach(function (platform) {
                     if (platform.$.name === 'ios') {
                         (platform.pod || []).forEach(function (pod) {
-                            newPods[pod.$.id] = pod.$;
+                            newPods.pods[pod.$.id] = pod.$;
                             console.log('config.xml requires pod: %s', pod.$.id);
                         });
                     }
@@ -73,7 +82,7 @@ module.exports = function (context) {
                                 if (platform.$.name === 'ios') {
 
                                     (platform.pod || []).forEach(function (pod) {
-                                        newPods[pod.$.id] = pod.$;
+                                        newPods.pods[pod.$.id] = pod.$;
                                         console.log('%s requires pod: %s', id, pod.$.id);
                                     });
                                 }
@@ -94,11 +103,14 @@ module.exports = function (context) {
 
         if (!podified || !_.isEqual(newPods, currentPods)) {
 
-            podfileContents.push("platform :ios, '7.0'");
+            podfileContents.push("platform :ios, '" + iosMinVersion + "'");
+            if (useFrameworks === 'true') {
+                podfileContents.push("use_frameworks!");
+            }
             podfileContents.push("target '" + appName + "' do");
 
-            for (podId in newPods) {
-                pod = newPods[podId];
+            for (podId in newPods.pods) {
+                pod = newPods.pods[podId];
                 var entry = "\tpod '" + pod.id + "'";
                 if (pod.version) {
                     entry += ", '" + pod.version + "'";
@@ -142,6 +154,17 @@ module.exports = function (context) {
                 fs.writeFileSync('platforms/ios/cordova/build-release.xcconfig', releaseXcContents + '\n' + '#include "Pods/Target Support Files/Pods-' + appName + '/Pods-' + appName + '.release.xcconfig"');
             }
 
+            var buildConfigContext = fs.readFileSync('platforms/ios/cordova/build.xcconfig', 'utf8');
+            var bridgedHeaderRegex;
+            if (useFrameworks) {
+                bridgedHeaderRegex = /SWIFT_OBJC_BRIDGING_HEADER/g;
+                fs.writeFileSync('platforms/ios/cordova/build.xcconfig', buildConfigContext.replace(bridgedHeaderRegex, '//SWIFT_OBJC_BRIDGING_HEADER'));
+            } else {
+                bridgedHeaderRegex = /\/\/SWIFT_OBJC_BRIDGING_HEADER/g;
+                fs.writeFileSync('platforms/ios/cordova/build.xcconfig', buildConfigContext.replace(bridgedHeaderRegex, 'SWIFT_OBJC_BRIDGING_HEADER'));
+
+            }
+
             fs.writeFileSync(podConfigPath, JSON.stringify(newPods, null, '\t'));
         } else {
             console.log('No new pods detects');
@@ -154,7 +177,8 @@ module.exports = function (context) {
             if (exists) {
 
                 if (!podified || !_.isEqual(newPods, currentPods)) {
-                    console.log('Installing pods');
+                    console.log("Installing pods");
+                    console.log("Sit back and relax this could take a while.");
                     execSync('pod update', {
                         cwd: 'platforms/ios'
                     }, function (err, stdout, stderr) {
@@ -163,7 +187,7 @@ module.exports = function (context) {
                     });
                 }
 
-                console.log('Updating ios build to use workspace.')
+                console.log('Updating ios build to use workspace.');
                 var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
                 var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
                 var targetFix = "'-scheme', projectName,";
@@ -203,10 +227,6 @@ module.exports = function (context) {
             var k = key.replace(/[{}]+/g, "");
             return data.hasOwnProperty(k) ? data[k] : "";
         });
-    }
-
-    function copy(src, dest) {
-        fs.writeFileSync(dest, fs.readFileSync(src, 'utf8'));
     }
 
     function copyTpl(src, dest, data) {
