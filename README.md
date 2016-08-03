@@ -75,7 +75,7 @@ or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-w
 
 ## Notes
 * Enabling the pods_use_frameworks preference disables the bridge headers property added by 
-(CB-10072)[https://issues.apache.org/jira/browse/CB-10072].  This might cause odd behavior in some projects.  
+[CB-10072](https://issues.apache.org/jira/browse/CB-10072).  This might cause odd behavior in some projects.  
 
 
 ##TODO:
