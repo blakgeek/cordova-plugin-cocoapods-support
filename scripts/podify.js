@@ -194,6 +194,8 @@ module.exports = function (context) {
                     podUpdate.on('close', function(exitCode) {
                         deferred.resolve(exitCode === 0);
                     });
+                } else {
+                    deferred.resolve(false);
                 }
 
             } else {
