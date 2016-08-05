@@ -182,16 +182,16 @@ module.exports = function (context) {
                 if (!podified || !_.isEqual(newPods, currentPods)) {
                     console.log("Installing pods");
                     console.log("Sit back and relax this could take a while.");
-                    var podUpdate = spawn('pod', ['update'], {
+                    var podInstall = spawn('pod', ['install'], {
                         cwd: 'platforms/ios'
                     });
-                    podUpdate.stdout.on('data', function(data) {
+                    podInstall.stdout.on('data', function(data) {
                         console.log(data.toString('utf8'));
                     });
-                    podUpdate.stderr.on('data', function(data) {
+                    podInstall.stderr.on('data', function(data) {
                         console.error(data.toString('utf8'));
                     });
-                    podUpdate.on('close', function(exitCode) {
+                    podInstall.on('close', function(exitCode) {
                         deferred.resolve(exitCode === 0);
                     });
                 } else {
