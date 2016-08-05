@@ -40,9 +40,9 @@ In a plugin's plugin.xml
 
     <platform name="ios">
         <!-- set platform :ios, defaults to 7.0 -->
-        <preference name="pods_min_ios_version" value="8.0"/>
+        <preference name="pods_ios_min_version" value="8.0" />
         <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
-        <preference name="pods_use_frameworks" value="true">
+        <preference name="pods_use_frameworks" value="true" />
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
@@ -70,8 +70,6 @@ In a project's config.xml
         <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
     </platform>
 ```
-
-or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-withpods).
 
 ## Notes
 * Enabling the pods_use_frameworks preference disables the bridged headers property added by 
