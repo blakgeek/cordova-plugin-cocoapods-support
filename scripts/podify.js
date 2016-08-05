@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require("path");
 var xml2js = require('xml2js');
 var commandExists = require('command-exists');
-var execSync = require('child_process').execSync;
+var spawn = require('child_process').spawn;
 var parser = new xml2js.Parser();
 
 module.exports = function (context) {
@@ -42,7 +42,8 @@ module.exports = function (context) {
     return Q.all(parsePluginXmls())
         .then(parseConfigXml)
         .then(createFiles)
-        .then(installPods);
+        .then(installPods)
+        .then(updateBuild);
 
     function parseConfigXml() {
 
@@ -172,6 +173,8 @@ module.exports = function (context) {
     }
 
     function installPods() {
+
+        var deferred = Q.defer();
         commandExists('pod', function (err, exists) {
 
             if (exists) {
@@ -179,46 +182,60 @@ module.exports = function (context) {
                 if (!podified || !_.isEqual(newPods, currentPods)) {
                     console.log("Installing pods");
                     console.log("Sit back and relax this could take a while.");
-                    execSync('pod update', {
+                    var podUpdate = spawn('pod', ['update'], {
                         cwd: 'platforms/ios'
-                    }, function (err, stdout, stderr) {
-                        console.log(stdout);
-                        console.error(stderr);
                     });
-                }
-
-                console.log('Updating ios build to use workspace.');
-                var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
-                var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
-                var targetFix = "'-scheme', projectName,";
-                var projectRegex = new RegExp("'-project'\\s*,\\s*projectName\\s*\\+\\s*'\\.xcodeproj'\\s*,", 'g');
-                var projectFix = "'-workspace', projectName + '.xcworkspace',";
-                var xcodeprojRegex = /\.xcodeproj/g;
-                var xcodeprojFix = '.xcworkspace';
-                var fixedBuildContent = buildContent
-                    .replace(targetRegex, targetFix)
-                    .replace(projectRegex, projectFix)
-                    .replace(xcodeprojRegex, xcodeprojFix);
-
-                fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
-
-                if (!podified) {
-                    console.log('Adding schemes');
-                    fs.mkdirSync(sharedDataDir);
-                    fs.mkdirSync(schemesTargetDir);
-                    copyTpl(schemesSrcDir + '/CordovaLib.xcscheme', schemesTargetDir + '/CordovaLib.xcscheme', {
-                        appName: appName
+                    podUpdate.stdout.on('data', function(data) {
+                        console.log(data.toString('utf8'));
                     });
-                    copyTpl(schemesSrcDir + '/App.xcscheme', schemesTargetDir + '/' + appName + '.xcscheme', {
-                        appName: appName,
-                        appId: '1D6058900D05DD3D006BFB54'
+                    podUpdate.stderr.on('data', function(data) {
+                        console.error(data.toString('utf8'));
+                    });
+                    podUpdate.on('close', function(exitCode) {
+                        deferred.resolve(exitCode === 0);
                     });
                 }
 
             } else {
                 console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
+                deferred.resolve(false);
             }
         });
+
+        return deferred.promise;
+    }
+
+    function updateBuild(shouldRun) {
+
+        if(shouldRun) {
+            console.log('Updating ios build to use workspace.');
+            var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
+            var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
+            var targetFix = "'-scheme', projectName,";
+            var projectRegex = new RegExp("'-project'\\s*,\\s*projectName\\s*\\+\\s*'\\.xcodeproj'\\s*,", 'g');
+            var projectFix = "'-workspace', projectName + '.xcworkspace',";
+            var xcodeprojRegex = /\.xcodeproj/g;
+            var xcodeprojFix = '.xcworkspace';
+            var fixedBuildContent = buildContent
+                .replace(targetRegex, targetFix)
+                .replace(projectRegex, projectFix)
+                .replace(xcodeprojRegex, xcodeprojFix);
+
+            fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
+
+            if (!podified) {
+                console.log('Adding schemes');
+                fs.mkdirSync(sharedDataDir);
+                fs.mkdirSync(schemesTargetDir);
+                copyTpl(schemesSrcDir + '/CordovaLib.xcscheme', schemesTargetDir + '/CordovaLib.xcscheme', {
+                    appName: appName
+                });
+                copyTpl(schemesSrcDir + '/App.xcscheme', schemesTargetDir + '/' + appName + '.xcscheme', {
+                    appName: appName,
+                    appId: '1D6058900D05DD3D006BFB54'
+                });
+            }
+        }
     }
 
     function templify(str, data) {
