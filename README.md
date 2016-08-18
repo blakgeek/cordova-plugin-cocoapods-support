@@ -59,12 +59,12 @@ In a project's config.xml
     <content src="index.html" />
     <access origin="*" />
     <platform name="ios">
-        <pod id="LatestPod" />
-        <pod id="VersionedPod" version="1.0.0" />
         <!-- set platform :ios, defaults to 7.0 -->
         <preference name="pods_ios_min_version" value="8.0"/>
         <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
         <preference name="pods_use_frameworks" value="true">
+        <pod id="LatestPod" />
+        <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
         <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
         <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
