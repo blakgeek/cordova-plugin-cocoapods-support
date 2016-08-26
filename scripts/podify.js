@@ -32,8 +32,6 @@ module.exports = function (context) {
     var schemesSrcDir = path.join(pluginDir, 'schemes');
     var schemesTargetDir = path.join(sharedDataDir, 'xcschemes');
     var newPods = {
-        iosMinVersion: iosMinVersion,
-        useFrameworks: useFrameworks === 'true',
         pods: {}
     };
 
@@ -81,7 +79,11 @@ module.exports = function (context) {
 
                             if (platform.$.name === 'ios') {
                                 if (platform.$.name === 'ios') {
-
+                                    var podsConfig = (platform['pods-config'] || [])[0];
+                                    if(podsConfig) {
+                                        iosMinVersion = maxVer(iosMinVersion, podsConfig.$['ios-min-version']);
+                                        useFrameworks = podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
+                                    }
                                     (platform.pod || []).forEach(function (pod) {
                                         newPods.pods[pod.$.id] = pod.$;
                                         console.log('%s requires pod: %s', id, pod.$.id);
@@ -101,6 +103,9 @@ module.exports = function (context) {
     }
 
     function createFiles() {
+
+        newPods.iosMinVersion = iosMinVersion;
+        newPods.useFrameworks = useFrameworks === 'true';
 
         if (!podified || !_.isEqual(newPods, currentPods)) {
 
@@ -265,5 +270,24 @@ module.exports = function (context) {
         return new ConfigParser(config);
     }
 
+    function maxVer(v1, v2) {
+
+        if(!v2) {
+            return v1;
+        }
+
+        var v1Parts = v1.split('.');
+        var v2Parts = v2.split('.');
+
+        if(+v1Parts[0] > +v2Parts[0]) {
+            return v1;
+        } else if(+v1Parts[0] < +v2Parts[0]) {
+            return v2;
+        } else if(+v1Parts[1] > +v2Parts[1]) {
+            return v1;
+        } else {
+            return v2;
+        }
+    }
 };
 
