@@ -39,6 +39,7 @@ In a plugin's plugin.xml
     <dependency id="cordova-plugin-cocoapod-support"/>
 
     <platform name="ios">
+        <pods-config ios-min-version="9.0" uses-frameworks="true"/>
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
