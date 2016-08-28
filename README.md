@@ -6,8 +6,9 @@ With this plugin you can define your plugin or project CocoaPods dependencies ri
  
 After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.
 
-Note: Dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
-Note: The highest value of minimum ios version will be used and use_frameworks! will be enabled if the flag is set anywhere.
+*Note*: Dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
+
+*Note*: The highest value of minimum ios version will be used and use_frameworks! will be enabled if the flag is set anywhere.
  
 ## How does it work?
 It looks for &lt;pod&gt; entries the config.xml and plugin.xml, creates the Podfile, updates the necessary configs and 
