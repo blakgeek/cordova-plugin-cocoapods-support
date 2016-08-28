@@ -7,6 +7,7 @@ With this plugin you can define your plugin or project CocoaPods dependencies ri
 After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.
 
 Note: Dependencies defined in the config.xml take precedence of dependencies defined in plugin's.
+Note: The highest value of minimum ios version will be used and use_frameworks! will be enabled if the flag is set anywhere.
  
 ## How does it work?
 It looks for &lt;pod&gt; entries the config.xml and plugin.xml, creates the Podfile, updates the necessary configs and 
@@ -39,6 +40,7 @@ In a plugin's plugin.xml
     <dependency id="cordova-plugin-cocoapod-support"/>
 
     <platform name="ios">
+        <!-- optionally set minimum ios version and enable use_frameworks! -->
         <pods-config ios-min-version="9.0" uses-frameworks="true"/>
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
