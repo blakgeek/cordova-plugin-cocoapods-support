@@ -72,8 +72,21 @@ In a project's config.xml
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
         <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
         <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
+        <!-- if pod uses a bundle that isn't compatible with Cocoapods 1.x -->
+        <pod id="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
     </platform>
 ```
+
+## Troubleshooting
+* If you get errors like the following.
+```
+error: Resource ".../Build/Products/Debug-iphonesimulator/Lock/Auth0.bundle" not found. Run 'pod install' to update the copy resources script
+```
+Add the fix-bundle-path attribute to the pod tag with the path after the device.  In this case:
+```xml
+<pod id="Lock" fix-bundle-path="Lock/Auth0.bundle"/>
+```
+This is caused by a bug in the later versions of CocoaPods.
 
 or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-withpods).
 

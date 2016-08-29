@@ -31,6 +31,7 @@ module.exports = function (context) {
     var pluginDir = context.opts.plugin.pluginInfo.dir;
     var schemesSrcDir = path.join(pluginDir, 'schemes');
     var schemesTargetDir = path.join(sharedDataDir, 'xcschemes');
+    var bundlePathsToFix = [];
     var newPods = {
         pods: {}
     };
@@ -41,6 +42,7 @@ module.exports = function (context) {
         .then(parseConfigXml)
         .then(createFiles)
         .then(installPods)
+        .then(fixBundlePaths)
         .then(updateBuild);
 
     function parseConfigXml() {
@@ -118,6 +120,9 @@ module.exports = function (context) {
             for (podId in newPods.pods) {
                 pod = newPods.pods[podId];
                 var entry = "\tpod '" + pod.id + "'";
+                if(pod['fix-bundle-path']) {
+                    bundlePathsToFix.push(pod['fix-bundle-path']);
+                }
                 if (pod.version) {
                     entry += ", '" + pod.version + "'";
                 } else if (pod.git) {
@@ -210,6 +215,27 @@ module.exports = function (context) {
         });
 
         return deferred.promise;
+    }
+
+    function fixBundlePaths(shouldRun) {
+
+        if(bundlePathsToFix.length) {
+            var podsResourcesSh = 'platforms/ios/Pods/Target Support Files/Pods-' + appName + '/Pods-' + appName + '-resources.sh';
+            var content = fs.readFileSync(podsResourcesSh, 'utf8');
+
+            bundlePathsToFix.forEach(function(path) {
+                var fixedPath = appName + '.app/' + path.split('/').slice(1).join('/');
+                var regex = new RegExp('(install_resource.*)' + path, 'gi');
+                console.log(content)
+                content = content.replace(regex, "$1" + fixedPath);
+                console.log(content)
+
+            });
+            fs.writeFileSync(podsResourcesSh, content);
+        }
+
+
+        return shouldRun;
     }
 
     function updateBuild(shouldRun) {
