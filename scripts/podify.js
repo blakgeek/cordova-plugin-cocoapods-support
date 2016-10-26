@@ -252,6 +252,7 @@ module.exports = function (context) {
             var destinationSimulatorOrg = "'-destination', 'platform=iOS Simulator'";
             var destinationSimulatorNew = "'-destination generic/platform=iOS'";
             var destinationRegex = /\-destination.*$/g;
+            var destinationRegex = new RegExp("'-destination'\\s*,\\s*.*,", 'g');           
             var destinationFix = "'-destination generic/platform=iOS',";
             var fixedBuildContent = buildContent
                 .replace(targetRegex, targetFix)
