@@ -251,7 +251,7 @@ module.exports = function (context) {
             var xcodeprojFix = '.xcworkspace';
             var destinationSimulatorOrg = "'-destination', 'platform=iOS Simulator'";
             var destinationSimulatorNew = "'-destination generic/platform=iOS'";
-            var destinationRegex = /\-destination\.*$/g;
+            var destinationRegex = /\-destination.*$/g;
             var destinationFix = "'-destination generic/platform=iOS',";
             var fixedBuildContent = buildContent
                 .replace(targetRegex, targetFix)
