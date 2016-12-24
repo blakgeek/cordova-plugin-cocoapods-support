@@ -4,9 +4,9 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require("path");
 var xml2js = require('xml2js');
-var commandExists = require('command-exists');
 var spawn = require('child_process').spawn;
 var parser = new xml2js.Parser();
+require('shelljs/global');
 
 module.exports = function (context) {
 
@@ -82,7 +82,7 @@ module.exports = function (context) {
                             if (platform.$.name === 'ios') {
                                 if (platform.$.name === 'ios') {
                                     var podsConfig = (platform['pods-config'] || [])[0];
-                                    if(podsConfig) {
+                                    if (podsConfig) {
                                         iosMinVersion = maxVer(iosMinVersion, podsConfig.$['ios-min-version']);
                                         useFrameworks = podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
                                     }
@@ -120,7 +120,7 @@ module.exports = function (context) {
             for (podId in newPods.pods) {
                 pod = newPods.pods[podId];
                 var entry = "\tpod '" + pod.id + "'";
-                if(pod['fix-bundle-path']) {
+                if (pod['fix-bundle-path']) {
                     bundlePathsToFix.push(pod['fix-bundle-path']);
                 }
                 if (pod.version) {
@@ -185,50 +185,46 @@ module.exports = function (context) {
     function installPods() {
 
         var deferred = Q.defer();
-        commandExists('pod', function (err, exists) {
 
-            if (exists) {
+        if (which('pod')) {
 
-                if (!podified || !_.isEqual(newPods, currentPods)) {
-                    console.log("Installing pods");
-                    console.log("Sit back and relax this could take a while.");
-                    var podInstall = spawn('pod', ['install'], {
-                        cwd: 'platforms/ios'
-                    });
-                    podInstall.stdout.on('data', function(data) {
-                        console.log(data.toString('utf8'));
-                    });
-                    podInstall.stderr.on('data', function(data) {
-                        console.error(data.toString('utf8'));
-                    });
-                    podInstall.on('close', function(exitCode) {
-                        deferred.resolve(exitCode === 0);
-                    });
-                } else {
-                    deferred.resolve(false);
-                }
-
+            if (!podified || !_.isEqual(newPods, currentPods)) {
+                console.log("Installing pods");
+                console.log("Sit back and relax this could take a while.");
+                var podInstall = spawn('pod', ['install'], {
+                    cwd: 'platforms/ios'
+                });
+                podInstall.stdout.on('data', function (data) {
+                    console.log(data.toString('utf8'));
+                });
+                podInstall.stderr.on('data', function (data) {
+                    console.error(data.toString('utf8'));
+                });
+                podInstall.on('close', function (exitCode) {
+                    deferred.resolve(exitCode === 0);
+                });
             } else {
-                console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
                 deferred.resolve(false);
             }
-        });
+
+        } else {
+            console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
+            deferred.resolve(false);
+        }
 
         return deferred.promise;
     }
 
     function fixBundlePaths(shouldRun) {
 
-        if(bundlePathsToFix.length) {
+        if (bundlePathsToFix.length) {
             var podsResourcesSh = 'platforms/ios/Pods/Target Support Files/Pods-' + appName + '/Pods-' + appName + '-resources.sh';
             var content = fs.readFileSync(podsResourcesSh, 'utf8');
 
-            bundlePathsToFix.forEach(function(path) {
+            bundlePathsToFix.forEach(function (path) {
                 var fixedPath = appName + '.app/' + path.split('/').slice(1).join('/');
                 var regex = new RegExp('(install_resource.*)' + path, 'gi');
-                console.log(content)
                 content = content.replace(regex, "$1" + fixedPath);
-                console.log(content)
 
             });
             fs.writeFileSync(podsResourcesSh, content);
@@ -240,7 +236,7 @@ module.exports = function (context) {
 
     function updateBuild(shouldRun) {
 
-        if(shouldRun) {
+        if (shouldRun) {
             console.log('Updating ios build to use workspace.');
             var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
             var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
@@ -249,7 +245,7 @@ module.exports = function (context) {
             var projectFix = "'-workspace', projectName + '.xcworkspace',";
             var xcodeprojRegex = /\.xcodeproj/g;
             var xcodeprojFix = '.xcworkspace';
-            var destinationRegex = new RegExp("'-destination'\\s*,\\s*.*,", 'g');           
+            var destinationRegex = new RegExp("'-destination'\\s*,\\s*.*,", 'g');
             var destinationFix = "'-destination generic/platform=iOS',";
             var fixedBuildContent = buildContent
                 .replace(targetRegex, targetFix)
@@ -261,8 +257,8 @@ module.exports = function (context) {
 
             if (!podified) {
                 console.log('Adding schemes');
-                fs.mkdirSync(sharedDataDir);
-                fs.mkdirSync(schemesTargetDir);
+                mkdir(sharedDataDir);
+                mkdir(schemesTargetDir);
                 copyTpl(schemesSrcDir + '/CordovaLib.xcscheme', schemesTargetDir + '/CordovaLib.xcscheme', {
                     appName: appName
                 });
@@ -301,18 +297,18 @@ module.exports = function (context) {
 
     function maxVer(v1, v2) {
 
-        if(!v2) {
+        if (!v2) {
             return v1;
         }
 
         var v1Parts = v1.split('.');
         var v2Parts = v2.split('.');
 
-        if(+v1Parts[0] > +v2Parts[0]) {
+        if (+v1Parts[0] > +v2Parts[0]) {
             return v1;
-        } else if(+v1Parts[0] < +v2Parts[0]) {
+        } else if (+v1Parts[0] < +v2Parts[0]) {
             return v2;
-        } else if(+v1Parts[1] > +v2Parts[1]) {
+        } else if (+v1Parts[1] > +v2Parts[1]) {
             return v1;
         } else {
             return v2;
