@@ -75,6 +75,7 @@ In a project's config.xml
         <!-- if pod uses a bundle that isn't compatible with Cocoapods 1.x -->
         <pod id="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
     </platform>
+</widget>
 ```
 
 ## Troubleshooting
