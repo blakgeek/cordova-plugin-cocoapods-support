@@ -3,7 +3,9 @@
     <name>Cordova CocoaPods Dependency Support</name>
     <author>Carlos "blakgeek" Lawton</author>
     <description>A Cordova/PhoneGap plugin to add support for CocoaPods dependencies.</description>
-    <keywords>cordova, ios, cocoapods, pod, pods, demo, example</keywords>
+    <keywords>cordova, ios, cocoapods, pod, pods</keywords>>
+    <repo>https://github.com/blakgeek/cordova-plugin-cocoapods-support.git</repo>
+    <issue>https://github.com/blakgeek/cordova-plugin-cocoapods-support/issues</issue>
     <license>MIT</license>
     <engines>
         <engine name="cordova" version=">=3.0.0"/>
