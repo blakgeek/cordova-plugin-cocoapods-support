@@ -42,7 +42,7 @@ In a plugin's plugin.xml
 
     <platform name="ios">
         <!-- optionally set minimum ios version and enable use_frameworks! -->
-        <pods-config ios-min-version="9.0" uses-frameworks="true"/>
+        <pods-config ios-min-version="9.0" use-frameworks="true"/>
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
@@ -66,7 +66,7 @@ In a project's config.xml
         <!-- set platform :ios, defaults to 7.0 -->
         <preference name="pods_ios_min_version" value="8.0"/>
         <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
-        <preference name="pods_use_frameworks" value="true">
+        <preference name="pods_use_frameworks" value="true"/>
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
@@ -88,7 +88,7 @@ Add the fix-bundle-path attribute to the pod tag with the path after the device.
 ```
 This is caused by a bug in the later versions of CocoaPods.
 
-or have a look at [the demo plugin](https://github.com/blakgeek/cordova-plugin-withpods).
+or have a look at [the example plugin](https://github.com/blakgeek/cordova-plugin-cocoapods-support-example).
 
 ## Notes
 * Enabling the pods_use_frameworks preference disables the bridged headers property added by 
