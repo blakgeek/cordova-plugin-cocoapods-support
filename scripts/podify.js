@@ -253,13 +253,10 @@ module.exports = function (context) {
             var projectFix = "'-workspace', projectName + '.xcworkspace',";
             var xcodeprojRegex = /\.xcodeproj/g;
             var xcodeprojFix = '.xcworkspace';
-            var destinationRegex = new RegExp("'-destination'\\s*,\\s*.*,", 'g');
-            var destinationFix = "'-destination generic/platform=iOS',";
             var fixedBuildContent = buildContent
                 .replace(targetRegex, targetFix)
                 .replace(projectRegex, projectFix)
-                .replace(xcodeprojRegex, xcodeprojFix)
-                .replace(destinationRegex, destinationFix);
+                .replace(xcodeprojRegex, xcodeprojFix);
 
             fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
 
@@ -276,6 +273,28 @@ module.exports = function (context) {
                 });
             }
         }
+    }
+
+    function fixSwiftLegacy(shouldRun){
+        var directories = getDirectories(path.join(__dirname + '/../../../platforms/ios/Pods/Target Support Files')),
+            podXcContents,
+            SWIFT_VERSION_REGX = /SWIFT_VERSION=(?:\d*\.)\d/g;
+        if(useLegacy){
+            for(var i = 0; i < directories.length; i++){
+                if(directories[i].indexOf(appName) === -1){
+                    podXcContents = fs.readFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', 'utf8');
+                    if(podXcContents.indexOf('SWIFT_VERSION') === -1){
+                        fs.writeFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', podXcContents + '\n' + 'SWIFT_VERSION=' + useLegacy)
+                    } else {
+                        fs.writeFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', podXcContents.replace(SWIFT_VERSION_REGX, 'SWIFT_VERSION=' + useLegacy))
+                    }
+                }
+            }
+
+            console.log('Using Swift Version ' + useLegacy);
+        }
+
+        return shouldRun;
     }
 
     function templify(str, data) {
