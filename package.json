@@ -39,6 +39,12 @@
     "semver",
     "xmlbuilder",
     "lodash",
-    "shelljs"
-  ]
+    "shelljs",
+    "glob",
+    "interpret",
+    "rechoir"
+  ],
+  "scripts": {
+    "postversion": "node scripts/bump-plugin-xml.js"
+  }
 }
