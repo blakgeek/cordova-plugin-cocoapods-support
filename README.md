@@ -42,7 +42,11 @@ In a plugin's plugin.xml
 
     <platform name="ios">
         <!-- optionally set minimum ios version and enable use_frameworks! -->
-        <pods-config ios-min-version="9.0" use-frameworks="true"/>
+        <pods-config ios-min-version="9.0" use-frameworks="true">
+             <!-- optionally add private spec sources -->
+            <source url="git@github.com:foo/foo-specs.git"/>
+            <source url="git@github.com:bar/bar-specs.git"/>
+        </pods-config>
         <pod id="LatestPod" />
         <pod id="VersionedPod" version="1.0.0" />
         <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
