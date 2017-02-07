@@ -45,6 +45,9 @@
     "rechoir"
   ],
   "scripts": {
-    "postversion": "node scripts/bump-plugin-xml.js"
+    "postversion": "node scripts/bump-plugin-xml.js; git add plugin.xml; git commit plugin.xml -m \"v${npm_package_version}\""
+  },
+  "devDependencies": {
+    "libxmljs": "^0.18.4"
   }
 }
