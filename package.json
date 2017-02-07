@@ -33,17 +33,6 @@
     "shelljs": "^0.7.5",
     "xml2js": "^0.4.16"
   },
-  "bundledDependencies": [
-    "xml2js",
-    "sax",
-    "semver",
-    "xmlbuilder",
-    "lodash",
-    "shelljs",
-    "glob",
-    "interpret",
-    "rechoir"
-  ],
   "scripts": {
     "postversion": "node scripts/bump-plugin-xml.js; git add plugin.xml; git commit plugin.xml -m \"v${npm_package_version}\""
   },
