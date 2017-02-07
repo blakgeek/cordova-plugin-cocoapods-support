@@ -262,8 +262,14 @@ module.exports = function (context) {
 
             if (!podified) {
                 console.log('Adding schemes');
-                mkdir(sharedDataDir);
-                mkdir(schemesTargetDir);
+                if(!test('-e', sharedDataDir)) {
+                    mkdir(sharedDataDir);
+                }
+
+                if(!test('-e', schemesTargetDir)) {
+                    mkdir(schemesTargetDir);
+                }
+
                 copyTpl(schemesSrcDir + '/CordovaLib.xcscheme', schemesTargetDir + '/CordovaLib.xcscheme', {
                     appName: appName
                 });
