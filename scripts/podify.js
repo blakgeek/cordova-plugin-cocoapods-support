@@ -37,10 +37,11 @@ module.exports = function (context) {
     var schemesTargetDir = path.join(sharedDataDir, 'xcschemes');
     var bundlePathsToFix = [];
     var newPods = {
-        pods: {}
+        pods: {},
+        sources: {}
     };
 
-    if(oldMinVersion) {
+    if (oldMinVersion) {
         console.warn('The preference "pods_ios_min_version" has been deprecated. Please use "deployment-target" instead.');
     }
 
@@ -91,9 +92,15 @@ module.exports = function (context) {
                                 if (platform.$.name === 'ios') {
                                     var podsConfig = (platform['pods-config'] || [])[0];
                                     if (podsConfig) {
-                                        iosMinVersion = maxVer(iosMinVersion, podsConfig.$['ios-min-version']);
-                                        useFrameworks = podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
+                                        iosMinVersion = maxVer(iosMinVersion, podsConfig.$ ? podsConfig.$['ios-min-version'] : iosMinVersion);
+                                        useFrameworks = podsConfig.$ && podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
+
+                                        (podsConfig.source || []).forEach(function (podSource) {
+                                            console.log('%s requires pod source: %s', id, podSource.$.url);
+                                            newPods.sources[podSource.$.url] = true;
+                                        });
                                     }
+
                                     (platform.pod || []).forEach(function (pod) {
                                         newPods.pods[pod.$.id] = pod.$;
                                         console.log('%s requires pod: %s', id, pod.$.id);
@@ -123,6 +130,12 @@ module.exports = function (context) {
             if (useFrameworks === 'true') {
                 podfileContents.push("use_frameworks!");
             }
+
+            Object.keys(newPods.sources).forEach(function (podSource) {
+                console.log("Adding pod source " + podSource);
+                podfileContents.push("source '" + podSource + "'");
+            });
+
             podfileContents.push("target '" + appName + "' do");
 
             for (podId in newPods.pods) {
@@ -262,11 +275,11 @@ module.exports = function (context) {
 
             if (!podified) {
                 console.log('Adding schemes');
-                if(!test('-e', sharedDataDir)) {
+                if (!test('-e', sharedDataDir)) {
                     mkdir(sharedDataDir);
                 }
 
-                if(!test('-e', schemesTargetDir)) {
+                if (!test('-e', schemesTargetDir)) {
                     mkdir(schemesTargetDir);
                 }
 
@@ -281,15 +294,15 @@ module.exports = function (context) {
         }
     }
 
-    function fixSwiftLegacy(shouldRun){
+    function fixSwiftLegacy(shouldRun) {
         var directories = getDirectories(path.join(__dirname + '/../../../platforms/ios/Pods/Target Support Files')),
             podXcContents,
             SWIFT_VERSION_REGX = /SWIFT_VERSION=(?:\d*\.)\d/g;
-        if(useLegacy){
-            for(var i = 0; i < directories.length; i++){
-                if(directories[i].indexOf(appName) === -1){
+        if (useLegacy) {
+            for (var i = 0; i < directories.length; i++) {
+                if (directories[i].indexOf(appName) === -1) {
                     podXcContents = fs.readFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', 'utf8');
-                    if(podXcContents.indexOf('SWIFT_VERSION') === -1){
+                    if (podXcContents.indexOf('SWIFT_VERSION') === -1) {
                         fs.writeFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', podXcContents + '\n' + 'SWIFT_VERSION=' + useLegacy)
                     } else {
                         fs.writeFileSync('platforms/ios/Pods/Target Support Files/' + directories[i] + '/' + directories[i] + '.xcconfig', podXcContents.replace(SWIFT_VERSION_REGX, 'SWIFT_VERSION=' + useLegacy))
