@@ -47,11 +47,11 @@ In a plugin's plugin.xml
             <source url="git@github.com:foo/foo-specs.git"/>
             <source url="git@github.com:bar/bar-specs.git"/>
         </pods-config>
-        <pod id="LatestPod" />
-        <pod id="VersionedPod" version="1.0.0" />
-        <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
-        <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
-        <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
+        <pod name="LatestPod" />
+        <pod name="VersionedPod" version="1.0.0" />
+        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
+        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
+        <pod name="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
     </platform>
 </plugin>
 ```
@@ -71,13 +71,13 @@ In a project's config.xml
         <preference name="pods_ios_min_version" value="8.0"/>
         <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
         <preference name="pods_use_frameworks" value="true"/>
-        <pod id="LatestPod" />
-        <pod id="VersionedPod" version="1.0.0" />
-        <pod id="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
-        <pod id="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
-        <pod id="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
+        <pod name="LatestPod" />
+        <pod name="VersionedPod" version="1.0.0" />
+        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
+        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
+        <pod name="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
         <!-- if pod uses a bundle that isn't compatible with Cocoapods 1.x -->
-        <pod id="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
+        <pod name="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
     </platform>
 </widget>
 ```
@@ -89,7 +89,7 @@ error: Resource ".../Build/Products/Debug-iphonesimulator/Lock/Auth0.bundle" not
 ```
 Add the fix-bundle-path attribute to the pod tag with the path after the device.  In this case:
 ```xml
-<pod id="Lock" fix-bundle-path="Lock/Auth0.bundle"/>
+<pod name="Lock" fix-bundle-path="Lock/Auth0.bundle"/>
 ```
 This is caused by a bug in the later versions of CocoaPods.
 
