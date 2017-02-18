@@ -64,8 +64,8 @@ Plugin developers, here's a sample plugin.xml.
 </plugin>
 ```
 
-App developers, here's a sample config.xml.  Entries in the config.xml will override the in the plugin.xml(s).  
-This is useful if you need to resolve conflicts between plugins or if a plugin doesn't include it's iOS pod dependencies. 
+App developers, here's a sample config.xml.  Entries in the config.xml will override the plugin.xml(s).  
+This is useful if you need to resolve conflicts between plugins or if a plugin doesn't include it's iOS dependencies. 
 ```xml
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.blakgeek.cordova.superdopeness" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
