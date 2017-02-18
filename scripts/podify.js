@@ -173,7 +173,10 @@ module.exports = function (context) {
                         return "'" + config.trim() + "'";
                     });
                     entry += ", :subspecs => [" + configs.join() + "]";
+                } else if (pod.podspec) {
+                    entry += ", :podspec => '" + pod.podspec + "'";
                 }
+
                 podfileContents.push(entry);
             }
             podfileContents.push('end');
