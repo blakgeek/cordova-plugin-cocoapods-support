@@ -2,7 +2,7 @@
 Are you tired of manually adding ios dependencies in Cordova apps?  Me too.  Android has Gradle support out of the box, but
 CocoaPods get no love.  That is until now.  
 
-With this plugin you can define your plugin or project CocoaPods dependencies right in your xml.
+With this plugin you can define plugin or project CocoaPods dependencies right in the xml.
  
 After adding this plugin be sure to open the .xcworkspace in XCode instead of the .xcodeproj.
 
@@ -29,7 +29,7 @@ phonegap local plugin add cordova-plugin-cocoapod-support
 
 ## How do I use it?  
  
-In a plugin's plugin.xml 
+Plugin developers, here's a sample plugin.xml.  
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
 <plugin id="cordova-plugin-withpods" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
@@ -47,16 +47,25 @@ In a plugin's plugin.xml
             <source url="git@github.com:foo/foo-specs.git"/>
             <source url="git@github.com:bar/bar-specs.git"/>
         </pods-config>
+        <!-- use the latest version of a pod -->
         <pod name="LatestPod" />
+        <!-- use a specific version of a pod -->
         <pod name="VersionedPod" version="1.0.0" />
-        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
-        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
+        <!-- use a custom repo -->
+        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" />
+        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" />
         <pod name="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
+        <!-- target specific configurations, this can be combined with all other options -->
+        <pod name="Foobar" configuration="debug" />
+        <pod name="Foobar" configurations="release,debug" />
+        <!-- add a pod dependency using a custom podspec -->
+        <pod name="JSONKit" podspec="https://example.com/JSONKit.podspec" />
     </platform>
 </plugin>
 ```
 
-In a project's config.xml
+App developers, here's a sample config.xml.  Entries in the config.xml will override the in the plugin.xml(s).  
+This is useful if you need to resolve conflicts between plugins or if a plugin doesn't include it's iOS pod dependencies. 
 ```xml
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.blakgeek.cordova.superdopeness" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -71,11 +80,19 @@ In a project's config.xml
         <preference name="pods_ios_min_version" value="8.0"/>
         <!-- add use_frameworks! to Podfile, this also disabled bridging headers -->
         <preference name="pods_use_frameworks" value="true"/>
+        <!-- use the latest version of a pod -->
         <pod name="LatestPod" />
+        <!-- use a specific version of a pod -->
         <pod name="VersionedPod" version="1.0.0" />
-        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" configuration="debug" />
-        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" configurations="release,debug" />
+        <!-- use a custom repo -->
+        <pod name="GitPod1" git="https://github.com/blakgeek/something" tag="v1.0.1" />
+        <pod name="GitPod2" git="https://github.com/blakgeek/something" branch="wood" />
         <pod name="GitPod3" git="https://github.com/blakgeek/something" commit="1b33368" />
+        <!-- target specific configurations, this can be combined with all other options -->
+        <pod name="Foobar" configuration="debug" />
+        <pod name="Foobar" configurations="release,debug" />
+        <!-- add a pod dependency using a custom podspec -->
+        <pod name="JSONKit" podspec="https://example.com/JSONKit.podspec" />
         <!-- if pod uses a bundle that isn't compatible with Cocoapods 1.x -->
         <pod name="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
     </platform>
@@ -96,6 +113,8 @@ This is caused by a bug in the later versions of CocoaPods.
 or have a look at [the example plugin](https://github.com/blakgeek/cordova-plugin-cocoapods-support-example).
 
 ## Notes
+* Pod "id" was deprecated in version 0.12.21.  You should use "name" instead.  But don't worry "id" will continue to work. 
+I made this change to better align with the podspec.
 * Enabling the pods_use_frameworks preference disables the bridged headers property added by 
 [CB-10072](https://issues.apache.org/jira/browse/CB-10072).  This might cause odd behavior in some projects.  
 
