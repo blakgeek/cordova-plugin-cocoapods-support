@@ -27,7 +27,7 @@ module.exports = function (context) {
         oldMinVersion || '7.0';
     var useFrameworks = configParser.getPreference('pods_use_frameworks', 'ios') || configParser.getPreference('pods_use_frameworks') || 'false';
     var podConfigPath = path.join(rootPath, 'platforms', 'ios', '.pods.json');
-    var pod, podId;
+    var pod, podName;
     var podified = fs.existsSync(podConfigPath);
     var currentPods = podified ? JSON.parse(fs.readFileSync(podConfigPath)) : {};
     var workspaceDir = path.join(rootPath, 'platforms', 'ios', '' + appName + '.xcworkspace');
@@ -63,8 +63,9 @@ module.exports = function (context) {
                 data.widget.platform.forEach(function (platform) {
                     if (platform.$.name === 'ios') {
                         (platform.pod || []).forEach(function (pod) {
-                            newPods.pods[pod.$.id] = pod.$;
-                            console.log('config.xml requires pod: %s', pod.$.id);
+                            var name = pod.$.name || pod.$.id;
+                            newPods.pods[name] = pod.$;
+                            console.log('config.xml requires pod: %s', name);
                         });
                     }
                 });
@@ -102,8 +103,9 @@ module.exports = function (context) {
                                     }
 
                                     (platform.pod || []).forEach(function (pod) {
-                                        newPods.pods[pod.$.id] = pod.$;
-                                        console.log('%s requires pod: %s', id, pod.$.id);
+                                        var name = pod.$.name || pod.$.id;
+                                        newPods.pods[name] = pod.$;
+                                        console.log('%s requires pod: %s', id, name);
                                     });
                                 }
                             }
@@ -138,9 +140,10 @@ module.exports = function (context) {
 
             podfileContents.push("target '" + appName + "' do");
 
-            for (podId in newPods.pods) {
-                pod = newPods.pods[podId];
-                var entry = "\tpod '" + pod.id + "'";
+            for (podName in newPods.pods) {
+                pod = newPods.pods[podName];
+
+                var entry = "\tpod '" + podName + "'";
                 if (pod['fix-bundle-path']) {
                     bundlePathsToFix.push(pod['fix-bundle-path']);
                 }
