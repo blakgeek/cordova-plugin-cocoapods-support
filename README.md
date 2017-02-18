@@ -113,7 +113,7 @@ This is caused by a bug in the later versions of CocoaPods.
 or have a look at [the example plugin](https://github.com/blakgeek/cordova-plugin-cocoapods-support-example).
 
 ## Notes
-* Pod "id" was deprecated in version 0.12.21.  You should use "name" instead.  But don't worry "id" will continue to work. 
+* Pod "id" was deprecated in version 0.13.0.  You should use "name" instead.  But don't worry "id" will continue to work. 
 I made this change to better align with the podspec.
 * Enabling the pods_use_frameworks preference disables the bridged headers property added by 
 [CB-10072](https://issues.apache.org/jira/browse/CB-10072).  This might cause odd behavior in some projects.  
