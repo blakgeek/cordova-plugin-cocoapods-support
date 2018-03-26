@@ -11,6 +11,5 @@
         <engine name="cordova" version="&gt;=3.0.0"/>
     </engines>
 
-    <hook type="before_plugin_install" src="scripts/npmInstall.js"/>
     <hook type="after_prepare" src="scripts/podify.js"/>
 </plugin>
