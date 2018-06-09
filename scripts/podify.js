@@ -10,7 +10,7 @@ require('shelljs/global');
 
 module.exports = function (context) {
 
-    if (context.opts.platforms.indexOf('ios') === -1) {
+    if (!context.opts.platforms || !context.opts.platforms.includes('ios')) {
         return;
     }
 
@@ -45,7 +45,7 @@ module.exports = function (context) {
         console.warn('The preference "pods_ios_min_version" has been deprecated. Please use "deployment-target" instead.');
     }
 
-    console.log('Searching for new pods');
+    log('Searching for new pods');
 
     return Q.all(parsePluginXmls())
         .then(parseConfigXml)
@@ -59,13 +59,13 @@ module.exports = function (context) {
         parser.parseString(fs.readFileSync('config.xml'), function (err, data) {
 
             if (data.widget.platform) {
-                console.log('Checking config.xml for pods.');
+                log('Checking config.xml for pods.');
                 data.widget.platform.forEach(function (platform) {
                     if (platform.$.name === 'ios') {
                         (platform.pod || []).forEach(function (pod) {
                             var name = pod.$.name || pod.$.id;
                             newPods.pods[name] = pod.$;
-                            console.log('config.xml requires pod: %s', name);
+                            log(`config.xml requires pod: ${name}`);
                         });
                     }
                 });
@@ -86,7 +86,7 @@ module.exports = function (context) {
                     deferred.reject(err);
                 } else {
                     if (data.plugin.platform) {
-                        console.log('Checking %s for pods.', id);
+                        log(`Checking ${id} for pods.`);
                         data.plugin.platform.forEach(function (platform) {
 
                             if (platform.$.name === 'ios') {
@@ -97,7 +97,7 @@ module.exports = function (context) {
                                     useFrameworks = podsConfig.$ && podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
 
                                     (podsConfig.source || []).forEach(function (podSource) {
-                                        console.log('%s requires pod source: %s', id, podSource.$.url);
+                                        log(`${id} requires pod source: ${podSource.$.url}`);
                                         newPods.sources[podSource.$.url] = true;
                                     });
                                 }
@@ -110,7 +110,7 @@ module.exports = function (context) {
 
                                         let name = framework.$.src;
                                         newPods.pods[name] = Object.assign({type: 'native'}, framework.$);
-                                        console.log(`${id} requires pod: ${name}`);
+                                        log(`${id} requires pod: ${name}`);
                                     }
                                 });
 
@@ -118,7 +118,7 @@ module.exports = function (context) {
                                 (platform.pod || []).forEach(function (pod) {
                                     var name = pod.$.name || pod.$.id;
                                     newPods.pods[name] = Object.assign({type: 'pod'}, pod.$);
-                                    console.log('%s requires pod: %s', id, name);
+                                    log(`${id} requires pod: ${name}`);
                                 });
                             }
                         });
@@ -146,7 +146,7 @@ module.exports = function (context) {
             }
 
             Object.keys(newPods.sources).forEach(function (podSource) {
-                console.log("Adding pod source " + podSource);
+                log("Adding pod source " + podSource);
                 podfileContents.push("source '" + podSource + "'");
             });
 
@@ -190,7 +190,7 @@ module.exports = function (context) {
                     suffix = '';
                 }
 
-                podfileContents.push(`\tpod ${podName}${suffix}`);
+                podfileContents.push(`\tpod '${podName}'${suffix}`);
             }
             podfileContents.push('end');
             fs.writeFileSync('platforms/ios/Podfile', podfileContents.join('\n'));
@@ -218,7 +218,7 @@ module.exports = function (context) {
 
             fs.writeFileSync(podConfigPath, JSON.stringify(newPods, null, '\t'));
         } else {
-            console.log('No new pods detects');
+            log('No new pods detects');
         }
     }
 
@@ -229,13 +229,13 @@ module.exports = function (context) {
         if (which('pod')) {
 
             if (!podified || !_.isEqual(newPods, currentPods)) {
-                console.log("Installing pods");
-                console.log("Sit back and relax this could take a while.");
+                log("Installing pods");
+                log("Sit back and relax this could take a while.");
                 var podInstall = spawn('pod', ['install'], {
                     cwd: 'platforms/ios'
                 });
                 podInstall.stdout.on('data', function (data) {
-                    console.log(data.toString('utf8'));
+                    log(data.toString('utf8'));
                 });
                 podInstall.stderr.on('data', function (data) {
                     console.error(data.toString('utf8'));
@@ -248,7 +248,7 @@ module.exports = function (context) {
             }
 
         } else {
-            console.log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
+            log("\nAh man!. It doesn't look like you have CocoaPods installed.\n\nYou have two choices.\n\n1. Install Cocoapods:\n$ sudo gem install cocoapods\n2. Manually install the dependencies.");
             deferred.resolve(false);
         }
 
@@ -277,7 +277,7 @@ module.exports = function (context) {
     function updateBuild(shouldRun) {
 
         if (shouldRun) {
-            console.log('Updating ios build to use workspace.');
+            log('Updating ios build to use workspace.');
             var buildContent = fs.readFileSync('platforms/ios/cordova/lib/build.js', 'utf8');
             var targetRegex = new RegExp("'-target',\\s*projectName\\s*,", 'g');
             var targetFix = "'-scheme', projectName,";
@@ -293,7 +293,7 @@ module.exports = function (context) {
             fs.writeFileSync('platforms/ios/cordova/lib/build.js', fixedBuildContent);
 
             if (!podified) {
-                console.log('Adding schemes');
+                log('Adding schemes');
                 if (!test('-e', sharedDataDir)) {
                     mkdir(sharedDataDir);
                 }
@@ -329,7 +329,7 @@ module.exports = function (context) {
                 }
             }
 
-            console.log('Using Swift Version ' + useLegacy);
+            log('Using Swift Version ' + useLegacy);
         }
 
         return shouldRun;
@@ -378,6 +378,10 @@ module.exports = function (context) {
         } else {
             return v2;
         }
+    }
+    
+    function log(message) {
+        console.log(message);
     }
 };
 
