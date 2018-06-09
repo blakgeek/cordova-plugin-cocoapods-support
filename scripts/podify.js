@@ -76,9 +76,9 @@ module.exports = function (context) {
     function parsePluginXmls() {
 
         var promises = [];
-        context.opts.cordova.plugins.forEach(function (id) {
+        context.opts.cordova.plugins.forEach(id => {
 
-            var deferred = Q.defer();
+            const deferred = Q.defer();
 
             parser.parseString(fs.readFileSync('plugins/' + id + '/plugin.xml'), function (err, data) {
 
@@ -90,24 +90,36 @@ module.exports = function (context) {
                         data.plugin.platform.forEach(function (platform) {
 
                             if (platform.$.name === 'ios') {
-                                if (platform.$.name === 'ios') {
-                                    var podsConfig = (platform['pods-config'] || [])[0];
-                                    if (podsConfig) {
-                                        iosMinVersion = maxVer(iosMinVersion, podsConfig.$ ? podsConfig.$['ios-min-version'] : iosMinVersion);
-                                        useFrameworks = podsConfig.$ && podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
+                                const podsConfig = (platform['pods-config'] || [])[0];
 
-                                        (podsConfig.source || []).forEach(function (podSource) {
-                                            console.log('%s requires pod source: %s', id, podSource.$.url);
-                                            newPods.sources[podSource.$.url] = true;
-                                        });
-                                    }
+                                if (podsConfig) {
+                                    iosMinVersion = maxVer(iosMinVersion, podsConfig.$ ? podsConfig.$['ios-min-version'] : iosMinVersion);
+                                    useFrameworks = podsConfig.$ && podsConfig.$['use-frameworks'] === 'true' ? 'true' : useFrameworks;
 
-                                    (platform.pod || []).forEach(function (pod) {
-                                        var name = pod.$.name || pod.$.id;
-                                        newPods.pods[name] = pod.$;
-                                        console.log('%s requires pod: %s', id, name);
+                                    (podsConfig.source || []).forEach(function (podSource) {
+                                        console.log('%s requires pod source: %s', id, podSource.$.url);
+                                        newPods.sources[podSource.$.url] = true;
                                     });
                                 }
+
+                                // support native dependency specification
+                                // <framework src="GoogleCloudMessaging" type="podspec" spec="~> 1.2.0" />
+                                (platform.framework || []).forEach(framework => {
+
+                                    if(framework.$.type === 'podspec') {
+
+                                        let name = framework.$.src;
+                                        newPods.pods[name] = Object.assign({type: 'native'}, framework.$);
+                                        console.log(`${id} requires pod: ${name}`);
+                                    }
+                                });
+
+                                // <pod> tags takes precedence over <framework> cuz well... it's my plugin :)
+                                (platform.pod || []).forEach(function (pod) {
+                                    var name = pod.$.name || pod.$.id;
+                                    newPods.pods[name] = Object.assign({type: 'pod'}, pod.$);
+                                    console.log('%s requires pod: %s', id, name);
+                                });
                             }
                         });
                     }
@@ -141,43 +153,44 @@ module.exports = function (context) {
             podfileContents.push("target '" + appName + "' do");
 
             for (podName in newPods.pods) {
+
+                let suffix;
                 pod = newPods.pods[podName];
 
-                var entry = "\tpod '" + podName + "'";
                 if (pod['fix-bundle-path']) {
                     bundlePathsToFix.push(pod['fix-bundle-path']);
                 }
                 if (pod.version) {
-                    entry += ", '" + pod.version + "'";
+                    suffix = `, '${pod.version}'`;
                 } else if (pod.git) {
-                    entry += ", :git => '" + pod.git + "'";
+                    suffix = ", :git => '" + pod.git + "'";
                     if (pod.tag) {
-                        entry += ", :tag => '" + pod.tag + "'";
+                        suffix += ", :tag => '" + pod.tag + "'";
                     } else if (pod.branch) {
-                        entry += ", :branch => '" + pod.branch + "'";
+                        suffix += ", :branch => '" + pod.branch + "'";
                     } else if (pod.commit) {
-                        entry += ", :commit => '" + pod.commit + "'";
+                        suffix += ", :commit => '" + pod.commit + "'";
                     }
 
                 } else if (pod.path) {
-                    entry += ", :path => '" + pod.path + "'";
+                    suffix = ", :path => '" + pod.path + "'";
                 } else if (pod.subspecs) {
-                    var specs = pod.subspec.split(',').map(function (spec) {
-                        return "'" + spec.trim() + "'";
-                    });
-                    entry += ", :subspecs => [" + specs.join() + "]";
+                    var specs = pod.subspec.split(',').map(spec => `'${spec.trim()}`);
+                    suffix = ", :subspecs => [" + specs.join() + "]";
                 } else if (pod.configuration) {
-                    entry += ", :configuration => '" + pod.configuration + "'";
+                    suffix = ", :configuration => '" + pod.configuration + "'";
                 } else if (pod.configurations) {
-                    var configs = pod.configurations.split(',').map(function (config) {
-                        return "'" + config.trim() + "'";
-                    });
-                    entry += ", :subspecs => [" + configs.join() + "]";
+                    var configs = pod.configurations.split(',').map(config => `'${config.trim()}`);
+                    suffix = ", :subspecs => [" + configs.join() + "]";
                 } else if (pod.podspec) {
-                    entry += ", :podspec => '" + pod.podspec + "'";
+                    suffix = ", :podspec => '" + pod.podspec + "'";
+                } else if (pod.spec) {
+                    suffix = pod.spec.startsWith(':') ? `, ${pod.spec}` : `, '${pod.spec}'`;
+                } else {
+                    suffix = '';
                 }
 
-                podfileContents.push(entry);
+                podfileContents.push(`\tpod ${podName}${suffix}`);
             }
             podfileContents.push('end');
             fs.writeFileSync('platforms/ios/Podfile', podfileContents.join('\n'));

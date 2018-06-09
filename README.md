@@ -60,6 +60,9 @@ Plugin developers, here's a sample plugin.xml.
         <pod name="Foobar" configurations="release,debug" />
         <!-- add a pod dependency using a custom podspec -->
         <pod name="JSONKit" podspec="https://example.com/JSONKit.podspec" />
+        <!-- add pod dependency using the spec parameter like a Cordova framework -->
+        <pod name="JustLikeCordova" spec="~> 2.0.0"/>
+        <pod name="JustLikeCordova" spec=":configurations => ['Debug', 'Beta']"/>
     </platform>
 </plugin>
 ```
@@ -93,6 +96,9 @@ This is useful if you need to resolve conflicts between plugins or if a plugin d
         <pod name="Foobar" configurations="release,debug" />
         <!-- add a pod dependency using a custom podspec -->
         <pod name="JSONKit" podspec="https://example.com/JSONKit.podspec" />
+        <!-- add a pod dependency using the spec parameter like a Cordova framework -->
+        <pod name="JustLikeCordova" spec="~> 2.0.0"/>
+        <pod name="JustLikeCordova" spec=":configurations => ['Debug', 'Beta']"/>
         <!-- if pod uses a bundle that isn't compatible with Cocoapods 1.x -->
         <pod name="BadBundle" fix-bundle-path="Bad/Path.bundle"/>
     </platform>
@@ -113,6 +119,7 @@ This is caused by a bug in the later versions of CocoaPods.
 or have a look at [the example plugin](https://github.com/blakgeek/cordova-plugin-cocoapods-support-example).
 
 ## Notes
+* The plugin now detects Cordova framework tags with type="podspec" so there shouldn't be anymore conflicts with the native functionality and the plugin.
 * Pod "id" was deprecated in version 1.3.0.  You should use "name" instead.  But don't worry "id" will continue to work. 
 I made this change to better align with the podspec.
 * Enabling the pods_use_frameworks preference disables the bridged headers property added by 
