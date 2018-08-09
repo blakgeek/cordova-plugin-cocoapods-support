@@ -175,7 +175,7 @@ module.exports = function (context) {
                 } else if (pod.path) {
                     suffix = ", :path => '" + pod.path + "'";
                 } else if (pod.subspecs) {
-                    var specs = pod.subspec.split(',').map(spec => `'${spec.trim()}`);
+                    var specs = pod.subspecs.split(',').map(spec => `'${spec.trim()}'`);
                     suffix = ", :subspecs => [" + specs.join() + "]";
                 } else if (pod.configuration) {
                     suffix = ", :configuration => '" + pod.configuration + "'";
