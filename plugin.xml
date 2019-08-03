@@ -8,7 +8,7 @@
     <issue>https://github.com/blakgeek/cordova-plugin-cocoapods-support/issues</issue>
     <license>MIT</license>
     <engines>
-        <engine name="cordova" version="&gt;=6.0.0"/>
+        <engine name="cordova" version=">=6.0.0"/>
     </engines>
 
     <hook type="after_prepare" src="scripts/podify.js"/>
